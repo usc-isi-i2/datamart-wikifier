@@ -1,0 +1,6 @@
+pandas
+requests
+scipy
+SPARQLWrapper
+tqdm
+Flask
