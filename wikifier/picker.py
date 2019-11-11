@@ -11,8 +11,9 @@ from ast import literal_eval
 from scipy.stats import entropy
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-#sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-sparql = SPARQLWrapper("http://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql")
+from config import SPARQL_URI, IDENTIFIER_WIKIFIER
+
+sparql = SPARQLWrapper(SPARQL_URI)
 
 requestId = str(sys.argv[1])
 
@@ -20,7 +21,7 @@ requestId = str(sys.argv[1])
 def getKeyPropertiesMapping(QNodes):
     headers = {'Content-Type': 'application/json'}
     data = json.dumps(QNodes)
-    responseText = requests.post('http://minds03.isi.edu:4444/get_properties', headers=headers, data=data).text
+    responseText = requests.post(IDENTIFIER_WIKIFIER, headers=headers, data=data).text
     return literal_eval(responseText)
 
 

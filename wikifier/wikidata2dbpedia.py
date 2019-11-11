@@ -7,8 +7,10 @@ from tqdm import tqdm
 from SPARQLWrapper import SPARQLWrapper, JSON
 from multiprocessing import Pool
 
+from config import DBPEDIA_URI
+
 sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-sparqldb = SPARQLWrapper("http://dbpedia.org/sparql")
+sparqldb = SPARQLWrapper(DBPEDIA_URI)
 
 class convertURI():
     def __init__(self):

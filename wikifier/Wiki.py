@@ -12,9 +12,10 @@ from tqdm import tqdm
 from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 
-#sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-sparqldb = SPARQLWrapper("http://dbpedia.org/sparql")
-sparql = SPARQLWrapper("http://sitaware.isi.edu:8080/bigdata/namespace/wdq/sparql")
+from config import SPARQL_URI, DBPEDIA_URI
+
+sparqldb = SPARQLWrapper(DBPEDIA_URI)
+sparql = SPARQLWrapper(SPARQL_URI)
 SuperClassFile = open("SuperClass.json", "r")
 SuperClassDict = json.loads(SuperClassFile.read())
 CandidateFile = open("CandidateIndex100.json", "r")

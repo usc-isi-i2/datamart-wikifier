@@ -15,11 +15,11 @@ import itertools
 from wikidata2dbpedia import convertURI
 
 from SPARQLWrapper import SPARQLWrapper, JSON
-#sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-sparqldb = SPARQLWrapper("http://dbpedia.org/sparql")
-#sparql = SPARQLWrapper("http://sitaware.isi.edu:8080/bigdata/namespace/wdq/sparql")
-#sparql = SPARQLWrapper("http://kg2018a.isi.edu:8888/bigdata/namespace/wdq/sparql")
-sparql = SPARQLWrapper("http://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql")
+
+from config import ELASTICSEARCH_URI, SPARQL_URI, IDENTIFIER_WIKIFIER, DBPEDIA_URI
+
+sparqldb = SPARQLWrapper(DBPEDIA_URI)
+sparql = SPARQLWrapper(SPARQL_URI)
 
 dataPath = 'input/'
 inferPath = 'input/'
@@ -135,7 +135,7 @@ def getElasticQNodes(label):
     label = re.sub(r"\(.+\)","",label)
     query = json.dumps({"query":{"bool":{"filter":[{"terms":{"namespace":[120],"boost":1}}],"must_not":[{"match_phrase":{"descriptions.en.plain":"Wikipedia disambiguation page"}}],"should":[{"query_string":{"query":label,"fields":["all^0.5","all.plain^1.0"],"use_dis_max":True,"tie_breaker":0,"default_operator":"and","auto_generate_phrase_queries":True,"max_determinized_states":10000,"allow_leading_wildcard":True,"enable_position_increments":True,"fuzziness":"AUTO","fuzzy_prefix_length":2,"fuzzy_max_expansions":50,"phrase_slop":0,"rewrite":"top_terms_boost_1024","escape":False,"split_on_whitespace":True,"boost":1}},{"multi_match":{"query":label,"fields":["all_near_match^2.0"],"type":"best_fields","operator":"OR","slop":0,"prefix_length":0,"max_expansions":50,"lenient":False,"zero_terms_query":"NONE","boost":1}}],"disable_coord":False,"adjust_pure_negative":True,"minimum_should_match":"1","boost":1}},"_source":{"includes":["namespace","title","namespace_text","wiki","labels.en","descriptions.en","incoming_links"],"excludes":[]},"stored_fields":"text.word_count","rescore":[{"window_size":8192,"query":{"rescore_query":{"function_score":{"query":{"match_all":{"boost":1}},"functions":[{"filter":{"match_all":{"boost":1}},"field_value_factor":{"field":"incoming_links","factor":1,"missing":0,"modifier":"log2p"}},{"filter":{"terms":{"namespace":[120],"boost":1}},"weight":0.2}],"score_mode":"multiply","max_boost":3.4028235e+38,"boost":1}},"query_weight":1,"rescore_query_weight":1,"score_mode":"multiply"}}],"stats":["suggest","full_text","full_text_querystring"],"size":5})
     HEADERS = {'Content-Type': 'application/json'}
-    uri = "http://kg2018a.isi.edu:9200/my_wiki_content_first/_search"
+    uri = ELASTICSEARCH_URI
     r = requests.get(uri,headers=HEADERS, data=query).json()
     try:
         return [i['_id'] for i in r['hits']['hits']]
@@ -146,7 +146,7 @@ def get_properties(qids):
     # perhaps cache this too later
     headers = {'Content-Type': 'application/json'}
     data = json.dumps(qids)
-    responseText = requests.post('http://minds03.isi.edu:4444/get_properties', headers=headers, data=data).text
+    responseText = requests.post(IDENTIFIER_WIKIFIER, headers=headers, data=data).text
     # print(responseText)
     try:
         return literal_eval(responseText)
